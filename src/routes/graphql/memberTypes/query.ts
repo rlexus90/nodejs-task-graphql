@@ -12,7 +12,7 @@ import { MemberType as MemberTypePrisma } from '@prisma/client';
 
 export const memberTypeId = new GraphQLNonNull(
   new GraphQLEnumType({
-    name: 'memberTypeId',
+    name: 'MemberTypeId',
     values: {
       basic: { value: MemberTypeId.BASIC },
       business: { value: MemberTypeId.BUSINESS },
@@ -21,7 +21,7 @@ export const memberTypeId = new GraphQLNonNull(
 );
 
 const memberType = new GraphQLObjectType({
-  name: 'memberType',
+  name: 'MemberType',
   fields: {
     id: {
       type: memberTypeId,
