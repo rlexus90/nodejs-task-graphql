@@ -9,19 +9,21 @@ import {
 import { MemberTypeId } from '../../member-types/schemas.js';
 import { Context } from '../types/context.js';
 
-const memberTypes = new GraphQLObjectType({
-  name: 'memberTypes',
+export const memberTypeId = new GraphQLNonNull(
+  new GraphQLEnumType({
+    name: 'memberTypeId',
+    values: {
+      basic: { value: MemberTypeId.BASIC },
+      business: { value: MemberTypeId.BUSINESS },
+    },
+  }),
+);
+
+const memberType = new GraphQLObjectType({
+  name: 'memberType',
   fields: {
     id: {
-      type: new GraphQLNonNull(
-        new GraphQLEnumType({
-          name: 'memberType',
-          values: {
-            basic: { value: MemberTypeId.BASIC },
-            business: { value: MemberTypeId.BUSINESS },
-          },
-        }),
-      ),
+      type: memberTypeId,
     },
     discount: {
       type: GraphQLFloat,
@@ -32,7 +34,7 @@ const memberTypes = new GraphQLObjectType({
 
 export const memberTypesQuery = {
   memberTypes: {
-    type: new GraphQLList(memberTypes),
+    type: new GraphQLList(memberType),
     resolve: (_: unknown, __: unknown, { prisma }: Context) => {
       return prisma.memberType.findMany();
     },

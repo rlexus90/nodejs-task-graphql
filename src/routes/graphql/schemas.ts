@@ -1,6 +1,9 @@
 import { Type } from '@fastify/type-provider-typebox';
 import { GraphQLObjectType, GraphQLSchema } from 'graphql';
 import { memberTypesQuery } from './memberTypes/query.js';
+import { postsQuery } from './posts/query.js';
+import { usersQuery } from './users/query.js';
+import { profileQuery } from './profiles/query.js';
 
 export const gqlResponseSchema = Type.Partial(
   Type.Object({
@@ -24,6 +27,6 @@ export const createGqlResponseSchema = {
 export const qraphqlShema = new GraphQLSchema({
   query: new GraphQLObjectType({
     name: 'query',
-    fields: { ...memberTypesQuery },
+    fields: { ...memberTypesQuery, ...postsQuery, ...usersQuery, ...profileQuery },
   }),
 });
