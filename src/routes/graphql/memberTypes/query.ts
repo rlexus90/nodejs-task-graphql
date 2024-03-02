@@ -8,6 +8,7 @@ import {
 } from 'graphql';
 import { MemberTypeId } from '../../member-types/schemas.js';
 import { Context } from '../types/context.js';
+import { MemberType as MemberTypePrisma } from '@prisma/client';
 
 export const memberTypeId = new GraphQLNonNull(
   new GraphQLEnumType({
@@ -37,6 +38,22 @@ export const memberTypesQuery = {
     type: new GraphQLList(memberType),
     resolve: (_: unknown, __: unknown, { prisma }: Context) => {
       return prisma.memberType.findMany();
+    },
+  },
+
+  memberType: {
+    type: memberType,
+    args: {
+      id: {
+        type: memberTypeId,
+      },
+    },
+    resolve: (_: unknown, args: MemberTypePrisma, { prisma }: Context) => {
+      return prisma.memberType.findUnique({
+        where: {
+          id: args.id,
+        },
+      });
     },
   },
 };

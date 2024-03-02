@@ -7,6 +7,7 @@ import {
 } from 'graphql';
 import { Context } from '../types/context.js';
 import { UUIDType } from '../types/uuid.js';
+import { User as UserPrisma } from '@prisma/client';
 
 const user = new GraphQLObjectType({
   name: 'user',
@@ -26,6 +27,21 @@ export const usersQuery = {
     type: new GraphQLList(user),
     resolve: (_: unknown, __: unknown, { prisma }: Context) => {
       return prisma.user.findMany();
+    },
+  },
+  user: {
+    type: user,
+    args: {
+      id: {
+        type: new GraphQLNonNull(UUIDType),
+      },
+    },
+    resolve: (_: unknown, args: UserPrisma, { prisma }: Context) => {
+      return prisma.user.findUnique({
+        where: {
+          id: args.id,
+        },
+      });
     },
   },
 };
