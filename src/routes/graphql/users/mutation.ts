@@ -5,7 +5,6 @@ import {
   GraphQLBoolean,
   GraphQLString,
   GraphQLFloat,
-  GraphQLList,
 } from 'graphql';
 import { Context } from '../types/context.js';
 import { UUIDType } from '../types/uuid.js';
