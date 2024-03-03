@@ -13,10 +13,7 @@ import { Post as PostsPrisma } from '@prisma/client';
 type createArgs = { dto: Omit<PostsPrisma, 'id'> };
 type changeArgs = {
   id: string;
-  dto: {
-    title: string;
-    content: string;
-  };
+  dto: Omit<PostsPrisma, 'id' | 'authorId'>;
 };
 type delArgs = { id: string };
 
@@ -82,3 +79,5 @@ export const deletePost: GraphQLFieldConfig<void, Context, delArgs> = {
     });
   },
 };
+
+export const postMutations = { createPost, changePost, deletePost };
