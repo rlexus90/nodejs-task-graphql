@@ -3,9 +3,9 @@ import { Context } from '../types/context.js';
 import { UUIDType } from '../types/uuid.js';
 import { Post as PostsPrisma } from '@prisma/client';
 
-const post = new GraphQLObjectType({
+export const post = new GraphQLObjectType({
   name: 'post',
-  fields: {
+  fields: () => ({
     id: {
       type: new GraphQLNonNull(UUIDType),
     },
@@ -16,7 +16,7 @@ const post = new GraphQLObjectType({
     authorId: {
       type: new GraphQLNonNull(UUIDType),
     },
-  },
+  }),
 });
 
 export const postsQuery = {

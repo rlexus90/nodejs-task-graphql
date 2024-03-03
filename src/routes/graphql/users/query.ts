@@ -8,10 +8,12 @@ import {
 import { Context } from '../types/context.js';
 import { UUIDType } from '../types/uuid.js';
 import { User as UserPrisma } from '@prisma/client';
+import { post } from '../posts/query.js';
+import { profile } from '../profiles/query.js';
 
-const user = new GraphQLObjectType({
+export const user: GraphQLObjectType = new GraphQLObjectType({
   name: 'user',
-  fields: {
+  fields: () => ({
     id: {
       type: new GraphQLNonNull(UUIDType),
     },
@@ -19,7 +21,55 @@ const user = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLString),
     },
     balance: { type: new GraphQLNonNull(GraphQLFloat) },
-  },
+    posts: {
+      type: new GraphQLList(post),
+      resolve: (obj: UserPrisma, _: unknown, { prisma }: Context) => {
+        return prisma.post.findMany({
+          where: {
+            authorId: obj.id,
+          },
+        });
+      },
+    },
+    profile: {
+      type: profile,
+      resolve: (obj: UserPrisma, _: unknown, { prisma }: Context) => {
+        return prisma.profile.findUnique({
+          where: {
+            userId: obj.id,
+          },
+        });
+      },
+    },
+    userSubscribedTo: {
+      type: new GraphQLList(user),
+      resolve: (obj: UserPrisma, _: unknown, { prisma }: Context) => {
+        return prisma.user.findMany({
+          where: {
+            subscribedToUser: {
+              some: {
+                subscriberId: obj.id,
+              },
+            },
+          },
+        });
+      },
+    },
+    subscribedToUser: {
+      type: new GraphQLList(user),
+      resolve: (obj: UserPrisma, _: unknown, { prisma }: Context) => {
+        return prisma.user.findMany({
+          where: {
+            userSubscribedTo: {
+              some: {
+                authorId: obj.id,
+              },
+            },
+          },
+        });
+      },
+    },
+  }),
 });
 
 export const usersQuery = {

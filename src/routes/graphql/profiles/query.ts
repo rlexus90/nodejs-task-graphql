@@ -7,12 +7,13 @@ import {
 } from 'graphql';
 import { Context } from '../types/context.js';
 import { UUIDType } from '../types/uuid.js';
-import { memberTypeId } from '../memberTypes/query.js';
+import { memberType, memberTypeId } from '../memberTypes/query.js';
 import { Profile as ProfilePrisma } from '@prisma/client';
+import { user } from '../users/query.js';
 
-const profile = new GraphQLObjectType({
+export const profile = new GraphQLObjectType({
   name: 'profile',
-  fields: {
+  fields: () => ({
     id: {
       type: new GraphQLNonNull(UUIDType),
     },
@@ -24,7 +25,27 @@ const profile = new GraphQLObjectType({
       type: new GraphQLNonNull(UUIDType),
     },
     memberTypeId: { type: memberTypeId },
-  },
+    memberType: {
+      type: memberType,
+      resolve: (obj: ProfilePrisma, _: unknown, { prisma }: Context) => {
+        return prisma.memberType.findUnique({
+          where: {
+            id: obj.memberTypeId,
+          },
+        });
+      },
+    },
+    user: {
+      type: user,
+      resolve: (obj: ProfilePrisma, _: unknown, { prisma }: Context) => {
+        return prisma.user.findUnique({
+          where: {
+            id: obj.userId,
+          },
+        });
+      },
+    },
+  }),
 });
 
 export const profileQuery = {

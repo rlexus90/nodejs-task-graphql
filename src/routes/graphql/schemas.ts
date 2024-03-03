@@ -27,6 +27,11 @@ export const createGqlResponseSchema = {
 export const qraphqlShema = new GraphQLSchema({
   query: new GraphQLObjectType({
     name: 'query',
-    fields: { ...memberTypesQuery, ...postsQuery, ...usersQuery, ...profileQuery },
+    fields: () => ({
+      ...memberTypesQuery,
+      ...postsQuery,
+      ...usersQuery,
+      ...profileQuery,
+    }),
   }),
 });

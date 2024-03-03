@@ -20,9 +20,9 @@ export const memberTypeId = new GraphQLNonNull(
   }),
 );
 
-const memberType = new GraphQLObjectType({
+export const memberType = new GraphQLObjectType({
   name: 'MemberType',
-  fields: {
+  fields: () => ({
     id: {
       type: memberTypeId,
     },
@@ -30,7 +30,7 @@ const memberType = new GraphQLObjectType({
       type: GraphQLFloat,
     },
     postsLimitPerMonth: { type: GraphQLInt },
-  },
+  }),
 });
 
 export const memberTypesQuery = {
