@@ -44,9 +44,9 @@ const ChangeUserInput = new GraphQLInputObjectType({
   name: 'ChangeUserInput',
   fields: () => ({
     name: {
-      type: new GraphQLNonNull(GraphQLString),
+      type: GraphQLString,
     },
-    balance: { type: new GraphQLNonNull(GraphQLFloat) },
+    balance: { type: GraphQLFloat },
   }),
 });
 
@@ -71,12 +71,13 @@ export const deleteUser: GraphQLFieldConfig<void, Context, delArgs> = {
   args: {
     id: { type: new GraphQLNonNull(UUIDType) },
   },
-  resolve: (_, args, { prisma }) => {
-    return prisma.user.delete({
+  resolve: async (_, args, { prisma }) => {
+    await prisma.user.delete({
       where: {
         id: args.id,
       },
     });
+    return true;
   },
 };
 

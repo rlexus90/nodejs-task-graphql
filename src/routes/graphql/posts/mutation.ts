@@ -46,9 +46,9 @@ const changePostInput = new GraphQLInputObjectType({
   name: 'ChangePostInput',
   fields: () => ({
     title: {
-      type: new GraphQLNonNull(GraphQLString),
+      type: GraphQLString,
     },
-    content: { type: new GraphQLNonNull(GraphQLString) },
+    content: { type: GraphQLString },
   }),
 });
 
@@ -71,12 +71,13 @@ export const deletePost: GraphQLFieldConfig<void, Context, delArgs> = {
   args: {
     id: { type: new GraphQLNonNull(UUIDType) },
   },
-  resolve: (_, args, { prisma }) => {
-    return prisma.post.delete({
+  resolve: async (_, args, { prisma }) => {
+    await prisma.post.delete({
       where: {
         id: args.id,
       },
     });
+    return true;
   },
 };
 

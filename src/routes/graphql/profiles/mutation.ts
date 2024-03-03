@@ -48,9 +48,9 @@ const changeProfileInput = new GraphQLInputObjectType({
   name: 'ChangeProfileInput',
   fields: () => ({
     isMale: {
-      type: new GraphQLNonNull(GraphQLBoolean),
+      type: GraphQLBoolean,
     },
-    yearOfBirth: { type: new GraphQLNonNull(GraphQLInt) },
+    yearOfBirth: { type: GraphQLInt },
     memberTypeId: { type: memberTypeId },
   }),
 });
@@ -76,12 +76,13 @@ export const deleteProfile: GraphQLFieldConfig<void, Context, delArgs> = {
   args: {
     id: { type: new GraphQLNonNull(UUIDType) },
   },
-  resolve: (_, args, { prisma }) => {
-    return prisma.profile.delete({
+  resolve: async (_, args, { prisma }) => {
+    await prisma.profile.delete({
       where: {
         id: args.id,
       },
     });
+    return true;
   },
 };
 

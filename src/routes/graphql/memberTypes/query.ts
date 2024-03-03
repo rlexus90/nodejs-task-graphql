@@ -10,21 +10,19 @@ import { MemberTypeId } from '../../member-types/schemas.js';
 import { Context } from '../types/context.js';
 import { MemberType as MemberTypePrisma } from '@prisma/client';
 
-export const memberTypeId = new GraphQLNonNull(
-  new GraphQLEnumType({
-    name: 'MemberTypeId',
-    values: {
-      basic: { value: MemberTypeId.BASIC },
-      business: { value: MemberTypeId.BUSINESS },
-    },
-  }),
-);
+export const memberTypeId = new GraphQLEnumType({
+  name: 'MemberTypeId',
+  values: {
+    basic: { value: MemberTypeId.BASIC },
+    business: { value: MemberTypeId.BUSINESS },
+  },
+});
 
 export const memberType = new GraphQLObjectType({
   name: 'MemberType',
   fields: () => ({
     id: {
-      type: memberTypeId,
+      type: new GraphQLNonNull(memberTypeId),
     },
     discount: {
       type: GraphQLFloat,
