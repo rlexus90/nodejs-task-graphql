@@ -6,7 +6,7 @@ import { usersQuery } from './users/query.js';
 import { profileQuery } from './profiles/query.js';
 import { postMutations } from './posts/mutation.js';
 import { profileMutations } from './profiles/mutation.js';
-import { userMutations } from './users/mutations.js';
+import { userMutations } from './users/mutation.js';
 
 export const gqlResponseSchema = Type.Partial(
   Type.Object({
