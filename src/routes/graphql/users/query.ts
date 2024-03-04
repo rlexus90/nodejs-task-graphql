@@ -10,6 +10,10 @@ import { UUIDType } from '../types/uuid.js';
 import { User as UserPrisma } from '@prisma/client';
 import { post } from '../posts/query.js';
 import { profile } from '../profiles/query.js';
+import { getPostsLoader } from '../dataLoaders/postsLoader.js';
+import { getProfileLoader } from '../dataLoaders/profileLoader.js';
+import { getUserSubscribedToLoader } from '../dataLoaders/userSubscribedToLoader.js';
+import { getSubscribedToUserLoader } from '../dataLoaders/subscribedToUserLoader.js';
 
 export const user: GraphQLObjectType = new GraphQLObjectType({
   name: 'user',
@@ -23,50 +27,61 @@ export const user: GraphQLObjectType = new GraphQLObjectType({
     balance: { type: new GraphQLNonNull(GraphQLFloat) },
     posts: {
       type: new GraphQLList(post),
-      resolve: (obj: UserPrisma, _: unknown, { prisma }: Context) => {
-        return prisma.post.findMany({
-          where: {
-            authorId: obj.id,
-          },
-        });
+      resolve: (obj: UserPrisma, _: unknown, context: Context, info) => {
+        const dataLoader = getPostsLoader(info, context);
+
+        // return context.prisma.post.findMany({
+        //   where: {
+        //     authorId: obj.id,
+        //   },
+        // });
+
+        return dataLoader.load(obj.id);
       },
     },
     profile: {
       type: profile,
-      resolve: (obj: UserPrisma, _: unknown, { prisma }: Context) => {
-        return prisma.profile.findUnique({
-          where: {
-            userId: obj.id,
-          },
-        });
+      resolve: (obj: UserPrisma, _: unknown, context: Context, info) => {
+        const dataLoader = getProfileLoader(info, context);
+
+        // return context.prisma.profile.findUnique({
+        //   where: {
+        //     userId: obj.id,
+        //   },
+        // });
+        return dataLoader.load(obj.id);
       },
     },
     userSubscribedTo: {
       type: new GraphQLList(user),
-      resolve: (obj: UserPrisma, _: unknown, { prisma }: Context) => {
-        return prisma.user.findMany({
-          where: {
-            subscribedToUser: {
-              some: {
-                subscriberId: obj.id,
-              },
-            },
-          },
-        });
+      resolve: (obj: UserPrisma, _: unknown, context: Context, info) => {
+        const dataLoader = getUserSubscribedToLoader(info, context);
+        // return context.prisma.user.findMany({
+        //   where: {
+        //     subscribedToUser: {
+        //       some: {
+        //         subscriberId: obj.id,
+        //       },
+        //     },
+        //   },
+        // });
+        return dataLoader.load(obj.id);
       },
     },
     subscribedToUser: {
       type: new GraphQLList(user),
-      resolve: (obj: UserPrisma, _: unknown, { prisma }: Context) => {
-        return prisma.user.findMany({
-          where: {
-            userSubscribedTo: {
-              some: {
-                authorId: obj.id,
-              },
-            },
-          },
-        });
+      resolve: (obj: UserPrisma, _: unknown, context: Context, info) => {
+        const dataLoader = getSubscribedToUserLoader(info, context);
+        // return context.prisma.user.findMany({
+        //   where: {
+        //     userSubscribedTo: {
+        //       some: {
+        //         authorId: obj.id,
+        //       },
+        //     },
+        //   },
+        // });
+        return dataLoader.load(obj.id);
       },
     },
   }),

@@ -10,6 +10,7 @@ import { UUIDType } from '../types/uuid.js';
 import { memberType, memberTypeId } from '../memberTypes/query.js';
 import { Profile as ProfilePrisma } from '@prisma/client';
 import { user } from '../users/query.js';
+import { getMemberTypeLoader } from '../dataLoaders/memberTypeLoader.js';
 
 export const profile = new GraphQLObjectType({
   name: 'profile',
@@ -27,12 +28,14 @@ export const profile = new GraphQLObjectType({
     memberTypeId: { type: memberTypeId },
     memberType: {
       type: memberType,
-      resolve: (obj: ProfilePrisma, _: unknown, { prisma }: Context) => {
-        return prisma.memberType.findUnique({
-          where: {
-            id: obj.memberTypeId,
-          },
-        });
+      resolve: (obj: ProfilePrisma, _: unknown, context: Context, info) => {
+        const dataLoader = getMemberTypeLoader(info, context);
+        // return context.prisma.memberType.findUnique({
+        //   where: {
+        //     id: obj.memberTypeId,
+        //   },
+        // });
+        return dataLoader.load(obj.id);
       },
     },
     user: {
