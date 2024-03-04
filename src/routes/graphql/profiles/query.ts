@@ -35,7 +35,7 @@ export const profile = new GraphQLObjectType({
         //     id: obj.memberTypeId,
         //   },
         // });
-        return dataLoader.load(obj.id);
+        return dataLoader.load(obj.memberTypeId);
       },
     },
     user: {

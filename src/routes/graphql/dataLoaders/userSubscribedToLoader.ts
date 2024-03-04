@@ -17,8 +17,13 @@ export const getUserSubscribedToLoader = (
             },
           },
         },
+        include: {
+          subscribedToUser: true,
+        },
       });
-      const subscribes = keys.map((key) => dbArr.filter((user) => user.id === key));
+      const subscribes = keys.map((key) =>
+        dbArr.filter((user) => user.subscribedToUser[0].subscriberId === key),
+      );
       return subscribes;
     });
     dataLoaders.set(info.fieldNodes, dataLoader);

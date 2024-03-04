@@ -10,11 +10,7 @@ export const getMemberTypeLoader = (
   let dataLoader = dataLoaders.get(info.fieldNodes);
   if (!dataLoader) {
     dataLoader = new DataLoader(async (keys: readonly string[]) => {
-      const dbArr = await prisma.memberType.findMany({
-        where: {
-          id: { in: [...keys] },
-        },
-      });
+      const dbArr = await prisma.memberType.findMany();
       const members = keys.map((key) =>
         dbArr.find((memberType) => memberType.id === key),
       );
