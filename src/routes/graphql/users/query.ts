@@ -4,6 +4,7 @@ import {
   GraphQLList,
   GraphQLString,
   GraphQLFloat,
+  GraphQLResolveInfo,
 } from 'graphql';
 import { Context } from '../types/context.js';
 import { UUIDType } from '../types/uuid.js';
@@ -12,8 +13,15 @@ import { post } from '../posts/query.js';
 import { profile } from '../profiles/query.js';
 import { getPostsLoader } from '../dataLoaders/postsLoader.js';
 import { getProfileLoader } from '../dataLoaders/profileLoader.js';
-import { getUserSubscribedToLoader } from '../dataLoaders/userSubscribedToLoader.js';
+
+import {
+  ResolveTree,
+  parseResolveInfo,
+  simplifyParsedResolveInfoFragmentWithType,
+} from 'graphql-parse-resolve-info';
+import { Subscript, UserExtendet } from '../types/users.js';
 import { getSubscribedToUserLoader } from '../dataLoaders/subscribedToUserLoader.js';
+import { getUserSubscribedToLoader } from '../dataLoaders/userSubscribedToLoader.js';
 
 export const user: GraphQLObjectType = new GraphQLObjectType({
   name: 'user',
@@ -54,8 +62,13 @@ export const user: GraphQLObjectType = new GraphQLObjectType({
     },
     userSubscribedTo: {
       type: new GraphQLList(user),
-      resolve: (obj: UserPrisma, _: unknown, context: Context, info) => {
+      resolve: (obj: UserExtendet, _: unknown, context: Context, info) => {
         const dataLoader = getUserSubscribedToLoader(info, context);
+
+        const { userSubscribedTo } = obj;
+        if (userSubscribedTo) {
+          if (!userSubscribedTo.some((el) => el.authorId)) return userSubscribedTo;
+        }
         // return context.prisma.user.findMany({
         //   where: {
         //     subscribedToUser: {
@@ -70,8 +83,13 @@ export const user: GraphQLObjectType = new GraphQLObjectType({
     },
     subscribedToUser: {
       type: new GraphQLList(user),
-      resolve: (obj: UserPrisma, _: unknown, context: Context, info) => {
+      resolve: (obj: UserExtendet, _: unknown, context: Context, info) => {
         const dataLoader = getSubscribedToUserLoader(info, context);
+
+        const { subscribedToUser } = obj;
+        if (subscribedToUser) {
+          if (!subscribedToUser.some((el) => el.authorId)) return subscribedToUser;
+        }
         // return context.prisma.user.findMany({
         //   where: {
         //     userSubscribedTo: {
@@ -90,8 +108,44 @@ export const user: GraphQLObjectType = new GraphQLObjectType({
 export const usersQuery = {
   users: {
     type: new GraphQLList(user),
-    resolve: (_: unknown, __: unknown, { prisma }: Context) => {
-      return prisma.user.findMany();
+    resolve: async (
+      _: unknown,
+      __: unknown,
+      context: Context,
+      info: GraphQLResolveInfo,
+    ) => {
+      // return context.prisma.user.findMany();
+
+      const resolveInfo = parseResolveInfo(info) as ResolveTree;
+      const { fields } = simplifyParsedResolveInfoFragmentWithType(resolveInfo, user);
+      const userSubscribedTo = Object.keys(fields).includes('userSubscribedTo');
+      const subscribedToUser = Object.keys(fields).includes('subscribedToUser');
+
+      const users = await context.prisma.user.findMany({
+        include: {
+          userSubscribedTo,
+          subscribedToUser,
+        },
+      });
+
+      const usersCache = new Map<string, UserExtendet>(
+        users.map((user) => [user.id, user]),
+      );
+
+      users.forEach((user) => {
+        if (userSubscribedTo) {
+          user.userSubscribedTo = (user.userSubscribedTo.map((user) =>
+            usersCache.get(user.subscriberId),
+          ) || []) as unknown as Subscript[];
+        }
+        if (subscribedToUser) {
+          user.subscribedToUser = (user.subscribedToUser.map((user) =>
+            usersCache.get(user.authorId),
+          ) || []) as unknown as Subscript[];
+        }
+      });
+
+      return users;
     },
   },
   user: {
